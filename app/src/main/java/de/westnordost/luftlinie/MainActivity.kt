@@ -1,7 +1,10 @@
 package de.westnordost.luftlinie
 
+import android.app.KeyguardManager
+import android.content.Context
 import android.content.Intent
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -29,13 +32,24 @@ class MainActivity : AppCompatActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+            val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+            keyguardManager.requestDismissKeyguard(this, null)
+        } else {
+            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
+            window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
+            window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+        }
+
         handleGeoUri()
     }
 
     private fun handleGeoUri() {
         if (Intent.ACTION_VIEW != intent.action) return
         val data = intent.data ?: return
-        if (data.scheme != "geo" ) return
+        if (data.scheme != "geo") return
         val geoUriRegex = Regex("(-?[0-9]*\\.?[0-9]+),(-?[0-9]*\\.?[0-9]+).*")
         val match = geoUriRegex.matchEntire(data.schemeSpecificPart) ?: return
         val lat = match.groupValues[1].toDoubleOrNull() ?: return
