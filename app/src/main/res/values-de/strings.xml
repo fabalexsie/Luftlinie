@@ -6,4 +6,5 @@
     <string name="turn_on_location_request">Standort ist aus. Jetzt in die Einstellungen gehen, um ihn anzuschalten?</string>
     <string name="didnt_find_anything">Nichts gefunden 🙁</string>
     <string name="copyright">Suchergebnisse © OpenStreetMap Mitwirkende</string>
+    <string name="use_destination_of_osmand">Nutzt das Ziel aus Osmand</string>
 </resources>

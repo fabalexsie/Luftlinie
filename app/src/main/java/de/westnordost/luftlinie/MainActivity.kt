@@ -7,14 +7,20 @@ import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import de.westnordost.luftlinie.geocoding.GeocodingFragment
 import de.westnordost.luftlinie.location.DestinationFragment
+import de.westnordost.luftlinie.osmandapi.OsmAndHelper
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity() {
 
     private val mainModel: MainViewModel by viewModel()
+
+    companion object {
+        const val REQUEST_OSMAND_API = 1001
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +50,44 @@ class MainActivity : AppCompatActivity() {
         }
 
         handleGeoUri()
+
+        val osmandHelper =
+            OsmAndHelper(this, REQUEST_OSMAND_API, OsmAndHelper.OnOsmandMissingListener { })
+        osmandHelper.getInfo()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == REQUEST_OSMAND_API) {
+            if (data != null) {
+                val extras = data.extras
+                if (extras != null && extras.size() > 0) {
+                    var lat: Double = Double.NaN
+                    var lon: Double = Double.NaN
+
+                    for (key in extras.keySet()) {
+                        if (key == "destination_lat") {
+                            val value = extras.get(key) ?: return
+                            lat = value as Double
+                        } else if (key == "destination_lon") {
+                            lon = extras.get(key) as Double
+                        }
+                    }
+                    if (lat.isNaN()) return
+                    if (lat < -90 || lat > +90) return
+                    if (lon.isNaN()) return
+                    if (lon < -180 && lon > +180) return
+
+                    Toast.makeText(this, R.string.use_destination_of_osmand, Toast.LENGTH_LONG)
+                        .show()
+                    mainModel.destinationLocation.value = Location(null as String?).apply {
+                        longitude = lon
+                        latitude = lat
+                    }
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     private fun handleGeoUri() {

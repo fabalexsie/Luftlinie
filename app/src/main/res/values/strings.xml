@@ -7,4 +7,5 @@
     <string name="turn_on_location_request">Location is off. Open Settings to turn it on now?</string>
     <string name="didnt_find_anything">Didn\'t find anything 🙁</string>
     <string name="copyright">Search results © OpenStreetMap contributors</string>
+    <string name="use_destination_of_osmand">Using the destination from osmand</string>
 </resources>
